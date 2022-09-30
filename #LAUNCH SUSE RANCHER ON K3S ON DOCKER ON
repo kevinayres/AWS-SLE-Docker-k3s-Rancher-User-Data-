@@ -1,0 +1,35 @@
+#LAUNCH SUSE RANCHER ON K3S ON DOCKER ON SLE - UPDATED 220930
+#AWS LAUNCH USER DATA DESIGNED FOR SLES15SP3> BYOS INSTANCE
+
+sudo SUSEConnect -r [KEY] -e [EMAIL ADDRESS]
+sudo zypper -n up
+
+sudo zypper in -n awscli
+
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+
+sudo zypper in -n kubernetes-client
+
+sudo zipper refresh
+
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo docker run -d --restart=unless-stopped   -p 80:80 -p 443:443   --privileged   rancher/rancher:latest
+
+#EDIT VALUES
+export aws_access_key_id=[ACCESS KEY]
+export aws_secret_access_key=[SECRET ACCESS KEY]
+export region=[REGION]
+
+mkdir ~/.aws/
+echo -e "[default] \naws_access_key_id=$aws_access_key_id \naws_access_key_id=$aws_access_key_id" > ~/.aws/credentials
+echo -e "[default] \nregion=$region \noutput=json" > ~/.aws/config
+
+sudo reboot
+
+#GET BOOTSTRAP PASSWORD
+#sudo docker ps
+#sudo docker logs [CONTAINER ID]  2>&1 | grep "Bootstrap Password:"
+#HTTPS to public DNS and update bootstrap PW to user created. 
+#uses self-signed certs. For Chrome, type “thisisunsafe” into browser page
